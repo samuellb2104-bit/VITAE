@@ -18,6 +18,8 @@ public class Donacion {
         this.id = id; this.usuarioIdDestino = usuarioIdDestino;
         this.usuarioIdDonante = usuarioIdDonante; this.monto = monto;
         this.fecha = fecha; this.concepto = concepto;
+
+        //3063869
     }
 
     public int getId() { return id; }

@@ -61,7 +61,7 @@ public class MenuDonante extends JFrame {
         p.setPreferredSize(new Dimension(0, 65));
         p.setBorder(BorderFactory.createMatteBorder(0,0,1,0,BORDE));
 
-        JLabel logo = new JLabel("💜 VITAE | Donante");
+        JLabel logo = new JLabel(" VITAE | Donante");
         logo.setFont(new Font("Arial", Font.BOLD, 22));
         logo.setForeground(MORADO);
         logo.setBorder(BorderFactory.createEmptyBorder(0,20,0,0));
@@ -117,9 +117,9 @@ public class MenuDonante extends JFrame {
         s.setBorder(BorderFactory.createMatteBorder(0,0,0,1,BORDE));
         s.add(Box.createRigidArea(new Dimension(0, 12)));
 
-        s.add(opSidebar("📰 Feed", "feed"));
-        s.add(opSidebar("💸 Mis donaciones", "mis_donaciones"));
-        s.add(opSidebar("💬 Mensajes", "mensajes")); // TODO
+        s.add(opSidebar(" Feed", "feed"));
+        s.add(opSidebar(" Mis donaciones", "mis_donaciones"));
+        s.add(opSidebar(" Mensajes", "mensajes")); // TODO
         s.add(Box.createVerticalGlue());
 
         JPanel perfil = new JPanel();
@@ -132,7 +132,7 @@ public class MenuDonante extends JFrame {
         JLabel n = new JLabel(usuario.getNombre());
         n.setForeground(MORADO); n.setFont(new Font("Arial", Font.BOLD, 12));
         perfil.add(n);
-        perfil.add(new JLabel("📧 " + usuario.getCorreo()));
+        perfil.add(new JLabel( usuario.getCorreo()));
         s.add(perfil);
         s.add(Box.createRigidArea(new Dimension(0, 12)));
 
@@ -147,7 +147,7 @@ public class MenuDonante extends JFrame {
         r.setBorder(BorderFactory.createEmptyBorder(16,12,16,12));
 
         JPanel card = card();
-        JLabel t = new JLabel("📊 Resumen");
+        JLabel t = new JLabel(" Resumen");
         t.setForeground(MORADO); t.setFont(new Font("Arial", Font.BOLD, 13));
         card.add(t); card.add(Box.createRigidArea(new Dimension(0,8)));
 
@@ -219,7 +219,7 @@ public class MenuDonante extends JFrame {
 
     private void mostrarMisDonaciones() {
         JPanel cont = stack();
-        JLabel tt = new JLabel("💸 Mis donaciones");
+        JLabel tt = new JLabel(" Mis donaciones");
         tt.setFont(new Font("Arial", Font.BOLD, 16));
         tt.setForeground(new Color(60,60,80));
         cont.add(tt);
@@ -239,7 +239,7 @@ public class MenuDonante extends JFrame {
 
     private void mostrarMensajesTODO() {
         JPanel cont = stack();
-        cont.add(banner("💬 Mensajes", "Este módulo se conectará a dbo.Mensajes"));
+        cont.add(banner(" Mensajes", "Este módulo se conectará a dbo.Mensajes"));
         panelContenido.add(wrap(cont), BorderLayout.NORTH);
     }
 
@@ -286,8 +286,8 @@ public class MenuDonante extends JFrame {
         JPanel c = card();
 
         // Encabezado (fundación + fecha + estado)
-        JLabel h = new JLabel("🏢 " + (p.nombre_fundacion == null ? ("Fundación #" + p.id_fundacion) : p.nombre_fundacion)
-                + "  •  ⏰ " + p.fecha_publicacion.format(fFecha)
+        JLabel h = new JLabel( (p.nombre_fundacion == null ? ("Fundación #" + p.id_fundacion) : p.nombre_fundacion)
+                + "  •   " + p.fecha_publicacion.format(fFecha)
                 + (p.estado != null ? " • " + p.estado : ""));
         h.setFont(new Font("Arial", Font.PLAIN, 11));
         h.setForeground(new Color(120,120,140));
@@ -320,7 +320,7 @@ public class MenuDonante extends JFrame {
 
         // Imagen URL (solo texto por ahora)
         if (p.imagen_url != null && !p.imagen_url.isBlank()) {
-            JLabel img = new JLabel("🖼️ " + p.imagen_url);
+            JLabel img = new JLabel("" + p.imagen_url);
             img.setFont(new Font("Arial", Font.ITALIC, 11));
             img.setForeground(AZUL);
             c.add(Box.createRigidArea(new Dimension(0,6)));
@@ -331,7 +331,7 @@ public class MenuDonante extends JFrame {
         c.add(Box.createRigidArea(new Dimension(0, 10)));
         JPanel acciones = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         acciones.setBackground(CARD);
-        JButton donar = new JButton("💝 Donar");
+        JButton donar = new JButton("Donar");
         estilizarPrimario(donar, VERDE);
         donar.addActionListener(e -> abrirDialogDonar(p.id_fundacion, p.nombre_fundacion));
         acciones.add(donar);
@@ -342,9 +342,9 @@ public class MenuDonante extends JFrame {
 
     private JPanel cardDonacion(DonRow d) {
         JPanel c = card();
-        JLabel a = new JLabel("🏢 " + (d.nombre_fundacion == null ? ("Fundación #" + d.usuario_id_destino) : d.nombre_fundacion));
+        JLabel a = new JLabel( (d.nombre_fundacion == null ? ("Fundación #" + d.usuario_id_destino) : d.nombre_fundacion));
         a.setFont(new Font("Arial", Font.BOLD, 13));
-        JLabel b = new JLabel("⏰ " + d.fecha.format(fFecha));
+        JLabel b = new JLabel(  d.fecha.format(fFecha));
         b.setFont(new Font("Arial", Font.PLAIN, 11));
         b.setForeground(new Color(120,120,140));
         JLabel m = new JLabel(formatoCOP(d.monto));
@@ -384,45 +384,14 @@ public class MenuDonante extends JFrame {
 
     /* ====== Diálogo de Donar (INSERT real) ====== */
     private void abrirDialogDonar(int idFundacion, String nombreFundacion) {
-        JTextField txtMonto = new JTextField(10);
-        JTextField txtConcepto = new JTextField(20);
-
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setBackground(FONDO);
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(6,6,6,6); c.fill = GridBagConstraints.HORIZONTAL; c.weightx=1;
-
-        int y=0;
-        c.gridx=0; c.gridy=y; form.add(new JLabel("Fundación:"), c);
-        c.gridx=1; form.add(new JLabel(nombreFundacion == null ? ("#" + idFundacion) : nombreFundacion), c); y++;
-        c.gridx=0; c.gridy=y; form.add(new JLabel("Monto (COP):"), c);
-        c.gridx=1; form.add(txtMonto, c); y++;
-        c.gridx=0; c.gridy=y; form.add(new JLabel("Concepto (opcional):"), c);
-        c.gridx=1; form.add(txtConcepto, c);
-
-        int r = JOptionPane.showConfirmDialog(this, form, "Nueva donación", JOptionPane.OK_CANCEL_OPTION);
-        if (r == JOptionPane.OK_OPTION) {
-            String sMonto = txtMonto.getText().trim();
-            if (sMonto.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Ingresa un monto.", "Dato requerido", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            long monto;
-            try { monto = Long.parseLong(sMonto.replace(".","").replace(",","")); }
-            catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Monto inválido.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            String concepto = txtConcepto.getText().trim();
-            boolean ok = insertarDonacion(idFundacion, usuario.getId_usuario(), monto, concepto.isEmpty()? null : concepto);
-            if (ok) {
-                JOptionPane.showMessageDialog(this, "¡Gracias por tu donación!");
-                cambiarVista("mis_donaciones");
-            } else {
-                JOptionPane.showMessageDialog(this, "No se pudo registrar la donación.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
+    DonacionForm dialog = new DonacionForm(this, usuario, idFundacion, nombreFundacion);
+    dialog.setVisible(true);
+    
+    // Si la donación fue exitosa, refrescar la vista
+    if (dialog.isDonacionExitosa()) {
+        cambiarVista("mis_donaciones");
     }
+}
 
     /* ====== SQL directo ====== */
 
