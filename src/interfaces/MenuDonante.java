@@ -3,6 +3,9 @@ package interfaces;
 import dao.ConexionSQL;
 import modelos.Usuario;
 
+import dao.NecesidadDAO;
+import modelos.Necesidad;
+
 import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
@@ -120,6 +123,7 @@ public class MenuDonante extends JFrame {
         s.add(opSidebar(" Feed", "feed"));
         s.add(opSidebar(" Mis donaciones", "mis_donaciones"));
         s.add(opSidebar(" Mensajes", "mensajes")); // TODO
+        s.add(opSidebar(" Necesidades", "necesidades")); // TODO
         s.add(Box.createVerticalGlue());
 
         JPanel perfil = new JPanel();
@@ -185,6 +189,61 @@ public class MenuDonante extends JFrame {
         return p;
     }
 
+    //Mostrar Necesidades
+    private void mostrarNecesidades() {
+    JPanel cont = stack();
+    JLabel tt = new JLabel("📋 Necesidades de fundaciones");
+    tt.setFont(new Font("Arial", Font.BOLD, 16));
+    tt.setForeground(new Color(60, 60, 80));
+    cont.add(tt);
+    cont.add(Box.createRigidArea(new Dimension(0, 10)));
+
+    NecesidadDAO dao = new NecesidadDAO();
+    List<Necesidad> lista = dao.listarActivas();
+
+    if (lista.isEmpty()) {
+        cont.add(infoVacio("No hay necesidades activas por el momento."));
+    } else {
+        for (Necesidad n : lista) {
+            cont.add(cardNecesidad(n));
+            cont.add(Box.createRigidArea(new Dimension(0, 10)));
+        }
+    }
+    panelContenido.add(wrap(cont), BorderLayout.NORTH);
+}
+
+private JPanel cardNecesidad(Necesidad n) {
+    JPanel card = card();
+
+    JLabel fundacion = new JLabel("🏢 " + (n.getNombreFundacion() != null ? n.getNombreFundacion() : "Fundación #" + n.getIdFundacion()));
+    fundacion.setFont(new Font("Arial", Font.BOLD, 12));
+    fundacion.setForeground(MORADO);
+    card.add(fundacion);
+
+    card.add(Box.createRigidArea(new Dimension(0, 6)));
+    JLabel titulo = new JLabel(n.getTitulo());
+    titulo.setFont(new Font("Arial", Font.BOLD, 14));
+    titulo.setForeground(new Color(50, 50, 70));
+    card.add(titulo);
+
+    if (n.getDescripcion() != null && !n.getDescripcion().isBlank()) {
+        card.add(Box.createRigidArea(new Dimension(0, 6)));
+        JLabel desc = new JLabel("<html>" + n.getDescripcion() + "</html>");
+        desc.setFont(new Font("Arial", Font.PLAIN, 12));
+        card.add(desc);
+    }
+
+    if (n.getMetaMonto() > 0) {
+        card.add(Box.createRigidArea(new Dimension(0, 6)));
+        JLabel meta = new JLabel("Meta: COP $" + String.format("%,d", n.getMetaMonto()).replace(',', '.'));
+        meta.setFont(new Font("Arial", Font.BOLD, 12));
+        meta.setForeground(VERDE);
+        card.add(meta);
+    }
+
+    return card;
+}
+
     /* ====== Vistas ====== */
     private void cambiarVista(String v) {
         vistaActual = v;
@@ -194,6 +253,7 @@ public class MenuDonante extends JFrame {
             case "feed" -> mostrarFeed(null);
             case "mis_donaciones" -> mostrarMisDonaciones();
             case "mensajes" -> mostrarMensajesTODO();
+            case "necesidades" -> mostrarNecesidades();
             default -> panelContenido.add(new JLabel("En construcción"));
         }
         panelContenido.revalidate();
