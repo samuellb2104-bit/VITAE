@@ -6,6 +6,9 @@ import modelos.Usuario;
 import dao.NecesidadDAO;
 import modelos.Necesidad;
 
+import dao.MensajeDAO;
+import modelos.Mensaje;
+
 import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
@@ -122,7 +125,7 @@ public class MenuDonante extends JFrame {
 
         s.add(opSidebar(" Feed", "feed"));
         s.add(opSidebar(" Mis donaciones", "mis_donaciones"));
-        s.add(opSidebar(" Mensajes", "mensajes")); // TODO
+        s.add(opSidebar(" Mensajes", "mensajes")); 
         s.add(opSidebar(" Necesidades", "necesidades")); // TODO
         s.add(Box.createVerticalGlue());
 
@@ -252,13 +255,154 @@ private JPanel cardNecesidad(Necesidad n) {
         switch (v) {
             case "feed" -> mostrarFeed(null);
             case "mis_donaciones" -> mostrarMisDonaciones();
-            case "mensajes" -> mostrarMensajesTODO();
+            case "mensajes" -> mostrarMensajes();
             case "necesidades" -> mostrarNecesidades();
             default -> panelContenido.add(new JLabel("En construcción"));
         }
         panelContenido.revalidate();
         panelContenido.repaint();
     }
+
+    //Mostrar Mensajes
+    private void mostrarMensajes() {
+    JPanel cont = stack();
+    JLabel tt = new JLabel("💬 Mis mensajes");
+    tt.setFont(new Font("Arial", Font.BOLD, 16));
+    tt.setForeground(new Color(60, 60, 80));
+    cont.add(tt);
+    cont.add(Box.createRigidArea(new Dimension(0, 10)));
+
+    // Lista de fundaciones disponibles para contactar
+    JPanel cardFunds = card();
+    JLabel lblFunds = new JLabel("Fundaciones disponibles:");
+    lblFunds.setFont(new Font("Arial", Font.BOLD, 13));
+    lblFunds.setForeground(MORADO);
+    cardFunds.add(lblFunds);
+    cardFunds.add(Box.createRigidArea(new Dimension(0, 8)));
+
+    List<String[]> fundaciones = listarFundaciones();
+    for (String[] f : fundaciones) {
+        JButton btnFund = new JButton("🏢 " + f[1]);
+        estilizarPrimario(btnFund, MORADO);
+        btnFund.addActionListener(e ->
+            abrirChatConFundacion(Integer.parseInt(f[0]), f[1])
+        );
+        cardFunds.add(btnFund);
+        cardFunds.add(Box.createRigidArea(new Dimension(0, 6)));
+    }
+    cont.add(cardFunds);
+    panelContenido.add(wrap(cont), BorderLayout.NORTH);
+}
+
+private void abrirChatConFundacion(int idFundacion, String nombreFundacion) {
+    panelContenido.removeAll();
+    JPanel cont = stack();
+
+    JLabel tt = new JLabel("💬 " + nombreFundacion);
+    tt.setFont(new Font("Arial", Font.BOLD, 16));
+    tt.setForeground(MORADO);
+    cont.add(tt);
+    cont.add(Box.createRigidArea(new Dimension(0, 10)));
+
+    // Necesidades de la fundación
+    JPanel cardNec = card();
+    JLabel lblNec = new JLabel("📋 Necesidades:");
+    lblNec.setFont(new Font("Arial", Font.BOLD, 13));
+    lblNec.setForeground(VERDE);
+    cardNec.add(lblNec);
+    cardNec.add(Box.createRigidArea(new Dimension(0, 8)));
+
+    List<Necesidad> necesidades = new NecesidadDAO().listarPorFundacion(idFundacion);
+    if (necesidades.isEmpty()) {
+        cardNec.add(new JLabel("Esta fundación no tiene necesidades activas."));
+    } else {
+        for (Necesidad n : necesidades) {
+            JLabel lbl = new JLabel("• " + n.getTitulo());
+            lbl.setFont(new Font("Arial", Font.PLAIN, 12));
+            cardNec.add(lbl);
+        }
+    }
+    cont.add(cardNec);
+    cont.add(Box.createRigidArea(new Dimension(0, 15)));
+
+    // Conversación
+    JPanel cardChat = card();
+    JLabel lblChat = new JLabel("Conversación:");
+    lblChat.setFont(new Font("Arial", Font.BOLD, 13));
+    lblChat.setForeground(VERDE);
+    cardChat.add(lblChat);
+    cardChat.add(Box.createRigidArea(new Dimension(0, 8)));
+
+    MensajeDAO mensajeDAO = new MensajeDAO();
+    List<Mensaje> mensajes = mensajeDAO.listarConversacion(usuario.getId_usuario(), idFundacion);
+    DateTimeFormatter f = DateTimeFormatter.ofPattern("dd/MM HH:mm");
+
+    if (mensajes.isEmpty()) {
+        cardChat.add(new JLabel("Aún no hay mensajes. ¡Sé el primero en escribir!"));
+    } else {
+        for (Mensaje m : mensajes) {
+            boolean esMio = m.getIdEmisor() == usuario.getId_usuario();
+            JLabel msg = new JLabel("<html><b>" + m.getNombreEmisor() + "</b> "
+                + m.getFechaEnvio().format(f) + "<br>" + m.getContenido() + "</html>");
+            msg.setFont(new Font("Arial", Font.PLAIN, 12));
+            msg.setForeground(esMio ? VERDE : MORADO);
+            cardChat.add(msg);
+            cardChat.add(Box.createRigidArea(new Dimension(0, 6)));
+        }
+    }
+    cont.add(cardChat);
+    cont.add(Box.createRigidArea(new Dimension(0, 10)));
+
+    // Enviar mensaje
+    JPanel cardEnviar = card();
+    JTextArea txtMensaje = new JTextArea(3, 25);
+    txtMensaje.setLineWrap(true);
+    txtMensaje.setWrapStyleWord(true);
+    txtMensaje.setBorder(BorderFactory.createLineBorder(BORDE, 1));
+    JButton btnEnviar = new JButton("Enviar ➤");
+    estilizarPrimario(btnEnviar, VERDE);
+    btnEnviar.addActionListener(e -> {
+        String texto = txtMensaje.getText().trim();
+        if (texto.isEmpty()) return;
+        boolean ok = mensajeDAO.enviar(usuario.getId_usuario(), idFundacion, texto);
+        if (ok) {
+            abrirChatConFundacion(idFundacion, nombreFundacion);
+        } else {
+            JOptionPane.showMessageDialog(this, "Error al enviar.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    });
+
+    JButton btnVolver = new JButton("← Volver");
+    estilizarPrimario(btnVolver, AZUL);
+    btnVolver.addActionListener(e -> cambiarVista("mensajes"));
+
+    JPanel botonesEnviar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+    botonesEnviar.setBackground(CARD);
+    botonesEnviar.add(btnVolver);
+    botonesEnviar.add(btnEnviar);
+
+    cardEnviar.add(new JScrollPane(txtMensaje));
+    cardEnviar.add(Box.createRigidArea(new Dimension(0, 8)));
+    cardEnviar.add(botonesEnviar);
+    cont.add(cardEnviar);
+
+    panelContenido.add(wrap(cont), BorderLayout.NORTH);
+    panelContenido.revalidate();
+    panelContenido.repaint();
+}
+
+private List<String[]> listarFundaciones() {
+    String sql = "SELECT id_usuario, nombre FROM Usuarios WHERE tipo_usuario = 'Fundacion' ORDER BY nombre";
+    List<String[]> out = new ArrayList<>();
+    try (Connection cn = ConexionSQL.getConexion();
+         PreparedStatement ps = cn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+            out.add(new String[]{ String.valueOf(rs.getInt("id_usuario")), rs.getString("nombre") });
+        }
+    } catch (SQLException ex) { ex.printStackTrace(); }
+    return out;
+}
 
     /** Feed con filtro opcional por texto (título/categoría) */
     private void mostrarFeed(String filtro) {
