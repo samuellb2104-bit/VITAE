@@ -5,6 +5,10 @@ import modelos.Usuario;
 import dao.NecesidadDAO;
 import modelos.Necesidad;
 
+import dao.MensajeDAO;
+import modelos.Mensaje;
+import java.time.format.DateTimeFormatter;
+
 import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
@@ -112,9 +116,10 @@ public class MenuFundacion extends JFrame {
         s.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, COLOR_BORDE));
 
         s.add(Box.createRigidArea(new Dimension(0, 12)));
-        s.add(opSidebar("🏠 Inicio", "inicio"));
-        s.add(opSidebar("📝 Mis publicaciones", "publicaciones"));
-        s.add(opSidebar("💰 Donaciones", "donaciones")); // TODO vista
+        s.add(opSidebar("Inicio", "inicio"));
+        s.add(opSidebar("Mis publicaciones", "publicaciones"));
+        s.add(opSidebar("Donaciones", "donaciones")); // TODO vista
+        s.add(opSidebar("Mensajes", "mensajes"));
         s.add(opSidebar("📋 Necesidades", "necesidades"));
         s.add(Box.createVerticalGlue());
 
@@ -189,11 +194,124 @@ public class MenuFundacion extends JFrame {
             case "publicaciones" -> mostrarMisPublicaciones();
             case "donaciones" -> mostrarDonacionesTODO(); // placeholder
             case "necesidades" -> mostrarNecesidades();
+            case "mensajes" -> mostrarMensajes();
             default -> panelContenido.add(new JLabel("Módulo en construcción"));
         }
         panelContenido.revalidate();
         panelContenido.repaint();
     }
+
+    //MostrarMensajesFundación
+    private void mostrarMensajes() {
+    JPanel cont = stack();
+    JLabel tt = new JLabel("💬 Mensajes recibidos");
+    tt.setFont(new Font("Arial", Font.BOLD, 16));
+    tt.setForeground(new Color(60, 60, 80));
+    cont.add(tt);
+    cont.add(Box.createRigidArea(new Dimension(0, 10)));
+
+    MensajeDAO dao = new MensajeDAO();
+    List<Mensaje> donantes = dao.listarMensajesRecibidos(usuario.getId_usuario());
+
+    if (donantes.isEmpty()) {
+        cont.add(infoVacio("No has recibido mensajes aún."));
+    } else {
+        for (Mensaje m : donantes) {
+            JPanel cardDonante = card();
+            JLabel nombre = new JLabel("👤 " + m.getNombreEmisor());
+            nombre.setFont(new Font("Arial", Font.BOLD, 13));
+            nombre.setForeground(COLOR_MORADO);
+            cardDonante.add(nombre);
+            cardDonante.add(Box.createRigidArea(new Dimension(0, 6)));
+
+            JButton btnVer = new JButton("Ver conversación");
+            estilizarPrimario(btnVer, COLOR_VERDE);
+            btnVer.addActionListener(e ->
+                abrirChatConDonante(m.getIdEmisor(), m.getNombreEmisor())
+            );
+            cardDonante.add(btnVer);
+            cont.add(cardDonante);
+            cont.add(Box.createRigidArea(new Dimension(0, 10)));
+        }
+    }
+    panelContenido.add(wrap(cont), BorderLayout.NORTH);
+}
+
+private void abrirChatConDonante(int idDonante, String nombreDonante) {
+    panelContenido.removeAll();
+    JPanel cont = stack();
+
+    JLabel tt = new JLabel("💬 " + nombreDonante);
+    tt.setFont(new Font("Arial", Font.BOLD, 16));
+    tt.setForeground(COLOR_MORADO);
+    cont.add(tt);
+    cont.add(Box.createRigidArea(new Dimension(0, 10)));
+
+    MensajeDAO mensajeDAO = new MensajeDAO();
+    List<Mensaje> mensajes = mensajeDAO.listarConversacion(usuario.getId_usuario(), idDonante);
+    DateTimeFormatter f = DateTimeFormatter.ofPattern("dd/MM HH:mm");
+
+    JPanel cardChat = card();
+    JLabel lblChat = new JLabel("Conversación:");
+    lblChat.setFont(new Font("Arial", Font.BOLD, 13));
+    lblChat.setForeground(COLOR_VERDE);
+    cardChat.add(lblChat);
+    cardChat.add(Box.createRigidArea(new Dimension(0, 8)));
+
+    if (mensajes.isEmpty()) {
+        cardChat.add(new JLabel("No hay mensajes en esta conversación."));
+    } else {
+        for (Mensaje m : mensajes) {
+            boolean esMio = m.getIdEmisor() == usuario.getId_usuario();
+            JLabel msg = new JLabel("<html><b>" + m.getNombreEmisor() + "</b> "
+                + m.getFechaEnvio().format(f) + "<br>" + m.getContenido() + "</html>");
+            msg.setFont(new Font("Arial", Font.PLAIN, 12));
+            msg.setForeground(esMio ? COLOR_VERDE : COLOR_MORADO);
+            cardChat.add(msg);
+            cardChat.add(Box.createRigidArea(new Dimension(0, 6)));
+        }
+    }
+    cont.add(cardChat);
+    cont.add(Box.createRigidArea(new Dimension(0, 10)));
+
+    // Responder
+    JPanel cardResponder = card();
+    JTextArea txtRespuesta = new JTextArea(3, 25);
+    txtRespuesta.setLineWrap(true);
+    txtRespuesta.setWrapStyleWord(true);
+    txtRespuesta.setBorder(BorderFactory.createLineBorder(COLOR_BORDE, 1));
+
+    JButton btnEnviar = new JButton("Responder ➤");
+    estilizarPrimario(btnEnviar, COLOR_VERDE);
+    btnEnviar.addActionListener(e -> {
+        String texto = txtRespuesta.getText().trim();
+        if (texto.isEmpty()) return;
+        boolean ok = mensajeDAO.enviar(usuario.getId_usuario(), idDonante, texto);
+        if (ok) {
+            abrirChatConDonante(idDonante, nombreDonante);
+        } else {
+            JOptionPane.showMessageDialog(this, "Error al enviar.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    });
+
+    JButton btnVolver = new JButton("← Volver");
+    estilizarPrimario(btnVolver, COLOR_AZUL);
+    btnVolver.addActionListener(e -> cambiarVista("mensajes"));
+
+    JPanel botones = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+    botones.setBackground(COLOR_TARJETA);
+    botones.add(btnVolver);
+    botones.add(btnEnviar);
+
+    cardResponder.add(new JScrollPane(txtRespuesta));
+    cardResponder.add(Box.createRigidArea(new Dimension(0, 8)));
+    cardResponder.add(botones);
+    cont.add(cardResponder);
+
+    panelContenido.add(wrap(cont), BorderLayout.NORTH);
+    panelContenido.revalidate();
+    panelContenido.repaint();
+}
 
     private void mostrarFeed() {
         JPanel cont = stack();

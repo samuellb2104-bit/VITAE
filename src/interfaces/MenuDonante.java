@@ -487,62 +487,130 @@ private List<String[]> listarFundaciones() {
     }
 
     private JPanel cardPublicacion(PubRow p) {
-        JPanel c = card();
-
-        // Encabezado (fundación + fecha + estado)
-        JLabel h = new JLabel( (p.nombre_fundacion == null ? ("Fundación #" + p.id_fundacion) : p.nombre_fundacion)
-                + "  •   " + p.fecha_publicacion.format(fFecha)
-                + (p.estado != null ? " • " + p.estado : ""));
-        h.setFont(new Font("Arial", Font.PLAIN, 11));
-        h.setForeground(new Color(120,120,140));
-        c.add(h);
-
-        // Título
-        c.add(Box.createRigidArea(new Dimension(0,8)));
-        JLabel titulo = new JLabel(p.titulo == null ? "(Sin título)" : p.titulo);
-        titulo.setFont(new Font("Arial", Font.BOLD, 15));
-        titulo.setForeground(new Color(50,50,70));
-        c.add(titulo);
-
-        // Categoría
-        if (p.categoria != null && !p.categoria.isBlank()) {
-            JLabel chip = new JLabel(" " + p.categoria + " ");
-            chip.setFont(new Font("Arial", Font.PLAIN, 10));
-            chip.setOpaque(true);
-            chip.setBackground(new Color(244, 240, 250));
-            chip.setForeground(MORADO);
-            chip.setBorder(BorderFactory.createLineBorder(MORADO));
-            c.add(Box.createRigidArea(new Dimension(0,6)));
-            c.add(chip);
+    JPanel card = new JPanel() {
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(CARD);
+            g2.fill(new java.awt.geom.RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 16, 16));
+            g2.dispose();
         }
+    };
+    card.setOpaque(false);
+    card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+    card.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    card.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
-        // Descripción
-        c.add(Box.createRigidArea(new Dimension(0,6)));
-        JLabel desc = new JLabel("<html>" + escape(p.descripcion == null ? "" : p.descripcion) + "</html>");
-        desc.setFont(new Font("Arial", Font.PLAIN, 13));
-        c.add(desc);
+    // Imagen de la publicación
+    if (p.imagen_url != null && !p.imagen_url.isBlank()) {
+        JPanel imgPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (getClientProperty("img") instanceof Image img) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setClip(new java.awt.geom.RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 16, 16));
+                    g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
+                    g2.dispose();
+                } else {
+                    setBackground(new Color(230, 240, 235));
+                }
+            }
+        };
+        imgPanel.setPreferredSize(new Dimension(0, 180));
+        imgPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 180));
+        imgPanel.setOpaque(true);
+        imgPanel.setBackground(new Color(230, 240, 235));
 
-        // Imagen URL (solo texto por ahora)
-        if (p.imagen_url != null && !p.imagen_url.isBlank()) {
-            JLabel img = new JLabel("" + p.imagen_url);
-            img.setFont(new Font("Arial", Font.ITALIC, 11));
-            img.setForeground(AZUL);
-            c.add(Box.createRigidArea(new Dimension(0,6)));
-            c.add(img);
-        }
+        // Carga la imagen en hilo aparte para no bloquear la UI
+        new Thread(() -> {
+            try {
+                java.net.URL url = new java.net.URL(p.imagen_url);
+                Image img = javax.imageio.ImageIO.read(url)
+                    .getScaledInstance(600, 180, Image.SCALE_SMOOTH);
+                imgPanel.putClientProperty("img", img);
+                SwingUtilities.invokeLater(imgPanel::repaint);
+            } catch (Exception ex) {
+                System.err.println("No se pudo cargar imagen: " + ex.getMessage());
+            }
+        }).start();
 
-        // Acciones
-        c.add(Box.createRigidArea(new Dimension(0, 10)));
-        JPanel acciones = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        acciones.setBackground(CARD);
-        JButton donar = new JButton("Donar");
-        estilizarPrimario(donar, VERDE);
-        donar.addActionListener(e -> abrirDialogDonar(p.id_fundacion, p.nombre_fundacion));
-        acciones.add(donar);
-        c.add(acciones);
-
-        return c;
+        card.add(imgPanel);
     }
+
+    // Contenido de texto
+    JPanel contenido = new JPanel();
+    contenido.setLayout(new BoxLayout(contenido, BoxLayout.Y_AXIS));
+    contenido.setOpaque(false);
+    contenido.setBorder(BorderFactory.createEmptyBorder(14, 16, 14, 16));
+
+    // Fundación + fecha
+    JLabel h = new JLabel((p.nombre_fundacion == null ? "Fundación #" + p.id_fundacion : p.nombre_fundacion)
+            + "  •  " + p.fecha_publicacion.format(fFecha));
+    h.setFont(new Font("Arial", Font.PLAIN, 11));
+    h.setForeground(new Color(140, 140, 160));
+    contenido.add(h);
+    contenido.add(Box.createRigidArea(new Dimension(0, 8)));
+
+    // Título
+    JLabel titulo = new JLabel(p.titulo == null ? "(Sin título)" : p.titulo);
+    titulo.setFont(new Font("Arial", Font.BOLD, 15));
+    titulo.setForeground(new Color(40, 40, 60));
+    contenido.add(titulo);
+
+    // Categoría chip
+    if (p.categoria != null && !p.categoria.isBlank()) {
+        contenido.add(Box.createRigidArea(new Dimension(0, 6)));
+        JLabel chip = new JLabel("  " + p.categoria + "  ");
+        chip.setFont(new Font("Arial", Font.PLAIN, 10));
+        chip.setOpaque(true);
+        chip.setBackground(new Color(244, 240, 250));
+        chip.setForeground(MORADO);
+        chip.setBorder(BorderFactory.createLineBorder(MORADO, 1));
+        contenido.add(chip);
+    }
+
+    // Descripción
+    contenido.add(Box.createRigidArea(new Dimension(0, 8)));
+    JLabel desc = new JLabel("<html><body style='width:350px'>"
+            + escape(p.descripcion == null ? "" : p.descripcion) + "</body></html>");
+    desc.setFont(new Font("Arial", Font.PLAIN, 12));
+    desc.setForeground(new Color(80, 80, 100));
+    contenido.add(desc);
+
+    // Botón donar
+    contenido.add(Box.createRigidArea(new Dimension(0, 12)));
+    JPanel acciones = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    acciones.setOpaque(false);
+    JButton donar = new JButton("💝 Donar ahora") {
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getBackground());
+            g2.fill(new java.awt.geom.RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 10, 10));
+            g2.dispose();
+            super.paintComponent(g);
+        }
+    };
+    donar.setFont(new Font("Arial", Font.BOLD, 12));
+    donar.setBackground(VERDE);
+    donar.setForeground(Color.WHITE);
+    donar.setFocusPainted(false);
+    donar.setBorderPainted(false);
+    donar.setContentAreaFilled(false);
+    donar.setOpaque(false);
+    donar.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+    donar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    donar.addActionListener(e -> abrirDialogDonar(p.id_fundacion, p.nombre_fundacion));
+    acciones.add(donar);
+    contenido.add(acciones);
+
+    card.add(contenido);
+    return card;
+}
 
     private JPanel cardDonacion(DonRow d) {
         JPanel c = card();
