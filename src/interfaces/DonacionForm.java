@@ -407,8 +407,8 @@ public class DonacionForm extends JDialog {
 
     private boolean insertarDonacion(int idFundacion, int idDonante, long monto, String concepto) {
         String sql = """
-            INSERT INTO dbo.Donaciones (usuario_id_destino, usuario_id_donante, monto, fecha, concepto)
-            VALUES (?, ?, ?, SYSDATETIME(), ?)
+            INSERT INTO dbo.Donaciones (ReceptorId, DonadorId, Monto, Fecha)
+            VALUES (?, ?, ?, SYSDATETIME())
         """;
         
         try (Connection cn = ConexionSQL.getConexion();
@@ -416,14 +416,17 @@ public class DonacionForm extends JDialog {
             ps.setInt(1, idFundacion);
             ps.setInt(2, idDonante);
             ps.setLong(3, monto);
-            ps.setString(4, concepto);
             return ps.executeUpdate() == 1;
-        } catch (SQLException ex) {
+        }  catch (SQLException ex) {
             ex.printStackTrace();
-        }
-        return false;
+            JOptionPane.showMessageDialog(null,
+                "Error: " + ex.getMessage() + 
+                "\nSQLState: " + ex.getSQLState() + 
+                "\nCódigo: " + ex.getErrorCode(),
+                "Error SQL", JOptionPane.ERROR_MESSAGE);
+}
+return false;
     }
-
     /* ====== Helpers ====== */
     private JPanel card() {
         JPanel c = new JPanel();
