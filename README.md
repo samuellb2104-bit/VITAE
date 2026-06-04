@@ -53,4 +53,4 @@ In `src/dao/ConexionSQL.java` update the URL, username and password values to ma
 
 ## Team
 
-Project developed by a two-person team. In colaboration with Samuel Gonzáles Pérez. [Go to](https://github.com/SamuSgp). My role covered the development of the graphical interface with Swing, the backend logic, and the design and implementation of the SQL Server database.
+Project developed by a two-person team. In colaboration with Samuel Gonzáles Pérez. [Go to his page](https://github.com/SamuSgp). My role covered the development of the graphical interface with Swing, the backend logic, and the design and implementation of the SQL Server database.
