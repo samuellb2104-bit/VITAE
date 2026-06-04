@@ -94,7 +94,7 @@ public class LoginForm extends JFrame {
         card.add(Box.createRigidArea(new Dimension(0, 6)));
 
         txtCorreo = new JTextField();
-        estilizarInput(txtCorreo, "✉  tu@correo.com");
+        estilizarInput(txtCorreo, " tu@correo.com");
         card.add(txtCorreo);
         card.add(Box.createRigidArea(new Dimension(0, 16)));
 
@@ -107,7 +107,7 @@ public class LoginForm extends JFrame {
         card.add(Box.createRigidArea(new Dimension(0, 6)));
 
         txtPass = new JPasswordField();
-        estilizarInput(txtPass, "🔒  ········");
+        estilizarInput(txtPass, "  ········");
         card.add(txtPass);
         card.add(Box.createRigidArea(new Dimension(0, 28)));
 
@@ -273,8 +273,8 @@ private JPanel crearLogo() {
         String correo = txtCorreo.getText().trim();
         String pass = new String(txtPass.getPassword());
 
-        if (correo.isEmpty() || correo.equals("✉  tu@correo.com") ||
-            pass.isEmpty() || pass.equals("🔒  ········")) {
+        if (correo.isEmpty() || correo.equals(" tu@correo.com") ||
+            pass.isEmpty() || pass.equals("  ········")) {
             JOptionPane.showMessageDialog(this,
                 "Ingresa correo y contraseña.", "Faltan datos",
                 JOptionPane.WARNING_MESSAGE);

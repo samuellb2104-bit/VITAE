@@ -61,43 +61,121 @@ public class MenuDonante extends JFrame {
     }
 
     /* ====== Header ====== */
-    private JPanel crearHeader() {
-        JPanel p = new JPanel(new BorderLayout());
-        p.setBackground(CARD);
-        p.setPreferredSize(new Dimension(0, 65));
-        p.setBorder(BorderFactory.createMatteBorder(0,0,1,0,BORDE));
+private JPanel crearHeader() {
+    JPanel p = new JPanel(new BorderLayout());
+    p.setBackground(CARD);
+    p.setPreferredSize(new Dimension(0, 70));
+    p.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(230, 230, 240)),
+        BorderFactory.createEmptyBorder(0, 20, 0, 20)
+    ));
 
-        JLabel logo = new JLabel(" VITAE | Donante");
-        logo.setFont(new Font("Arial", Font.BOLD, 22));
-        logo.setForeground(MORADO);
-        logo.setBorder(BorderFactory.createEmptyBorder(0,20,0,0));
-        p.add(logo, BorderLayout.WEST);
+    // Logo izquierda
+    JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    logoPanel.setOpaque(false);
 
-        // busqueda simple (categoría/título)
-        JTextField txtBuscar = new JTextField(26);
-        txtBuscar.putClientProperty("JComponent.roundRect", true);
-        JButton btnBuscar = new JButton("Buscar");
-        estilizarPrimario(btnBuscar, AZUL);
-        JPanel center = new JPanel();
-        center.setOpaque(false);
-        center.add(new JLabel("🔎"));
-        center.add(txtBuscar);
-        center.add(btnBuscar);
-        btnBuscar.addActionListener(e -> mostrarFeed(txtBuscar.getText().trim()));
-        p.add(center, BorderLayout.CENTER);
+    JLabel nombre = new JLabel("VITAE");
+    nombre.setFont(new Font("Arial", Font.BOLD, 22));
+    nombre.setForeground(MORADO);
 
-        JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 10));
-        der.setBackground(CARD);
-        der.add(new JLabel("👤 " + usuario.getNombre()));
-        JButton salir = new JButton("Salir");
-        estilizarPeligro(salir);
-        salir.addActionListener(e -> cerrarSesion());
-        der.add(salir);
-        p.add(der, BorderLayout.EAST);
+    JLabel rol = new JLabel(" VITAE |  Donante");
+    rol.setFont(new Font("Arial", Font.PLAIN, 13));
+    rol.setForeground(new Color(180, 180, 200));
 
-        return p;
-    }
+    logoPanel.add(nombre);
+    logoPanel.add(rol);
+    p.add(logoPanel, BorderLayout.WEST);
 
+    // Búsqueda centro
+    JPanel centerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
+    centerPanel.setOpaque(false);
+
+    JTextField txtBuscar = new JTextField(24);
+    txtBuscar.setFont(new Font("Arial", Font.PLAIN, 12));
+    txtBuscar.setBackground(new Color(247, 247, 252));
+    txtBuscar.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createLineBorder(new Color(220, 220, 235), 1),
+        BorderFactory.createEmptyBorder(8, 12, 8, 12)
+    ));
+    txtBuscar.setText("Buscar publicaciones...");
+    txtBuscar.setForeground(new Color(180, 180, 200));
+    txtBuscar.addFocusListener(new java.awt.event.FocusAdapter() {
+        public void focusGained(java.awt.event.FocusEvent e) {
+            if (txtBuscar.getText().equals("Buscar publicaciones...")) {
+                txtBuscar.setText("");
+                txtBuscar.setForeground(new Color(40, 40, 60));
+            }
+        }
+        public void focusLost(java.awt.event.FocusEvent e) {
+            if (txtBuscar.getText().isEmpty()) {
+                txtBuscar.setText("Buscar publicaciones...");
+                txtBuscar.setForeground(new Color(180, 180, 200));
+            }
+        }
+    });
+
+    JButton btnBuscar = new JButton("Buscar") {
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getBackground());
+            g2.fill(new java.awt.geom.RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 8, 8));
+            g2.dispose();
+            super.paintComponent(g);
+        }
+    };
+    btnBuscar.setFont(new Font("Arial", Font.BOLD, 12));
+    btnBuscar.setBackground(MORADO);
+    btnBuscar.setForeground(Color.WHITE);
+    btnBuscar.setFocusPainted(false);
+    btnBuscar.setBorderPainted(false);
+    btnBuscar.setContentAreaFilled(false);
+    btnBuscar.setOpaque(false);
+    btnBuscar.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+    btnBuscar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    btnBuscar.addActionListener(e -> mostrarFeed(txtBuscar.getText().trim()));
+
+    centerPanel.add(txtBuscar);
+    centerPanel.add(btnBuscar);
+    p.add(centerPanel, BorderLayout.CENTER);
+
+    // Usuario derecha
+    JPanel derPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+    derPanel.setOpaque(false);
+
+    JLabel lblUsuario = new JLabel(usuario.getNombre());
+    lblUsuario.setFont(new Font("Arial", Font.BOLD, 13));
+    lblUsuario.setForeground(new Color(60, 60, 80));
+
+    JButton salir = new JButton("Salir") {
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getBackground());
+            g2.fill(new java.awt.geom.RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 8, 8));
+            g2.dispose();
+            super.paintComponent(g);
+        }
+    };
+    salir.setFont(new Font("Arial", Font.BOLD, 12));
+    salir.setBackground(new Color(231, 76, 60));
+    salir.setForeground(Color.WHITE);
+    salir.setFocusPainted(false);
+    salir.setBorderPainted(false);
+    salir.setContentAreaFilled(false);
+    salir.setOpaque(false);
+    salir.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+    salir.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    salir.addActionListener(e -> cerrarSesion());
+
+    derPanel.add(lblUsuario);
+    derPanel.add(salir);
+    p.add(derPanel, BorderLayout.EAST);
+
+    return p;
+}
     /* ====== Main ====== */
     private JPanel crearMain() {
         JPanel main = new JPanel(new BorderLayout());
@@ -195,7 +273,7 @@ public class MenuDonante extends JFrame {
     //Mostrar Necesidades
     private void mostrarNecesidades() {
     JPanel cont = stack();
-    JLabel tt = new JLabel("📋 Necesidades de fundaciones");
+    JLabel tt = new JLabel(" Necesidades de fundaciones");
     tt.setFont(new Font("Arial", Font.BOLD, 16));
     tt.setForeground(new Color(60, 60, 80));
     cont.add(tt);
@@ -218,7 +296,7 @@ public class MenuDonante extends JFrame {
 private JPanel cardNecesidad(Necesidad n) {
     JPanel card = card();
 
-    JLabel fundacion = new JLabel("🏢 " + (n.getNombreFundacion() != null ? n.getNombreFundacion() : "Fundación #" + n.getIdFundacion()));
+    JLabel fundacion = new JLabel("" + (n.getNombreFundacion() != null ? n.getNombreFundacion() : "Fundación #" + n.getIdFundacion()));
     fundacion.setFont(new Font("Arial", Font.BOLD, 12));
     fundacion.setForeground(MORADO);
     card.add(fundacion);
@@ -266,7 +344,7 @@ private JPanel cardNecesidad(Necesidad n) {
     //Mostrar Mensajes
     private void mostrarMensajes() {
     JPanel cont = stack();
-    JLabel tt = new JLabel("💬 Mis mensajes");
+    JLabel tt = new JLabel("Mis mensajes");
     tt.setFont(new Font("Arial", Font.BOLD, 16));
     tt.setForeground(new Color(60, 60, 80));
     cont.add(tt);
@@ -282,7 +360,7 @@ private JPanel cardNecesidad(Necesidad n) {
 
     List<String[]> fundaciones = listarFundaciones();
     for (String[] f : fundaciones) {
-        JButton btnFund = new JButton("🏢 " + f[1]);
+        JButton btnFund = new JButton("" + f[1]);
         estilizarPrimario(btnFund, MORADO);
         btnFund.addActionListener(e ->
             abrirChatConFundacion(Integer.parseInt(f[0]), f[1])
@@ -298,7 +376,7 @@ private void abrirChatConFundacion(int idFundacion, String nombreFundacion) {
     panelContenido.removeAll();
     JPanel cont = stack();
 
-    JLabel tt = new JLabel("💬 " + nombreFundacion);
+    JLabel tt = new JLabel("" + nombreFundacion);
     tt.setFont(new Font("Arial", Font.BOLD, 16));
     tt.setForeground(MORADO);
     cont.add(tt);
@@ -306,7 +384,7 @@ private void abrirChatConFundacion(int idFundacion, String nombreFundacion) {
 
     // Necesidades de la fundación
     JPanel cardNec = card();
-    JLabel lblNec = new JLabel("📋 Necesidades:");
+    JLabel lblNec = new JLabel("Necesidades:");
     lblNec.setFont(new Font("Arial", Font.BOLD, 13));
     lblNec.setForeground(VERDE);
     cardNec.add(lblNec);
@@ -584,7 +662,7 @@ private List<String[]> listarFundaciones() {
     contenido.add(Box.createRigidArea(new Dimension(0, 12)));
     JPanel acciones = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     acciones.setOpaque(false);
-    JButton donar = new JButton("💝 Donar ahora") {
+    JButton donar = new JButton("Donar ahora") {
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g.create();
@@ -625,7 +703,7 @@ private List<String[]> listarFundaciones() {
 
         c.add(a); c.add(b);
         if (d.concepto != null && !d.concepto.isBlank()) {
-            JLabel con = new JLabel("📝 " + d.concepto);
+            JLabel con = new JLabel("" + d.concepto);
             con.setFont(new Font("Arial", Font.PLAIN, 12));
             c.add(con);
         }

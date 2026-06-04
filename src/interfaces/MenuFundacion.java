@@ -65,13 +65,13 @@ public class MenuFundacion extends JFrame {
         panel.setPreferredSize(new Dimension(0, 65));
         panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, COLOR_BORDE));
 
-        JLabel lblLogo = new JLabel("💚 VITAE | Fundación");
+        JLabel lblLogo = new JLabel(" VITAE | Fundación");
         lblLogo.setFont(new Font("Arial", Font.BOLD, 22));
         lblLogo.setForeground(COLOR_VERDE);
         lblLogo.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         panel.add(lblLogo, BorderLayout.WEST);
 
-        JButton btnNueva = new JButton("✍️ Nueva publicación");
+        JButton btnNueva = new JButton(" Nueva publicación");
         estilizarPrimario(btnNueva, COLOR_MORADO);
         btnNueva.addActionListener(e -> abrirDialogNuevaPublicacion());
         JPanel centro = new JPanel();
@@ -81,7 +81,7 @@ public class MenuFundacion extends JFrame {
 
         JPanel der = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 10));
         der.setBackground(Color.WHITE);
-        der.add(new JLabel("🏢 " + usuario.getNombre()));
+        der.add(new JLabel(" " + usuario.getNombre()));
         JButton salir = new JButton("Salir");
         estilizarPeligro(salir);
         salir.addActionListener(e -> cerrarSesion());
@@ -120,7 +120,7 @@ public class MenuFundacion extends JFrame {
         s.add(opSidebar("Mis publicaciones", "publicaciones"));
         s.add(opSidebar("Donaciones", "donaciones")); // TODO vista
         s.add(opSidebar("Mensajes", "mensajes"));
-        s.add(opSidebar("📋 Necesidades", "necesidades"));
+        s.add(opSidebar("Necesidades", "necesidades"));
         s.add(Box.createVerticalGlue());
 
         // mini perfil
@@ -135,7 +135,7 @@ public class MenuFundacion extends JFrame {
         n.setFont(new Font("Arial", Font.BOLD, 12));
         n.setForeground(COLOR_VERDE);
         perfil.add(n);
-        perfil.add(new JLabel("📧 " + usuario.getCorreo()));
+        perfil.add(new JLabel(" " + usuario.getCorreo()));
         s.add(perfil);
         s.add(Box.createRigidArea(new Dimension(0, 12)));
 
@@ -172,7 +172,7 @@ public class MenuFundacion extends JFrame {
 
         // Resumen simple (dinámico desde BD)
         JPanel card = card();
-        JLabel t = new JLabel("📊 Resumen");
+        JLabel t = new JLabel(" Resumen");
         t.setForeground(COLOR_VERDE); t.setFont(new Font("Arial", Font.BOLD, 13));
         card.add(t); card.add(Box.createRigidArea(new Dimension(0,8)));
 
@@ -204,7 +204,7 @@ public class MenuFundacion extends JFrame {
     //MostrarMensajesFundación
     private void mostrarMensajes() {
     JPanel cont = stack();
-    JLabel tt = new JLabel("💬 Mensajes recibidos");
+    JLabel tt = new JLabel(" Mensajes recibidos");
     tt.setFont(new Font("Arial", Font.BOLD, 16));
     tt.setForeground(new Color(60, 60, 80));
     cont.add(tt);
@@ -218,7 +218,7 @@ public class MenuFundacion extends JFrame {
     } else {
         for (Mensaje m : donantes) {
             JPanel cardDonante = card();
-            JLabel nombre = new JLabel("👤 " + m.getNombreEmisor());
+            JLabel nombre = new JLabel(" " + m.getNombreEmisor());
             nombre.setFont(new Font("Arial", Font.BOLD, 13));
             nombre.setForeground(COLOR_MORADO);
             cardDonante.add(nombre);
@@ -241,7 +241,7 @@ private void abrirChatConDonante(int idDonante, String nombreDonante) {
     panelContenido.removeAll();
     JPanel cont = stack();
 
-    JLabel tt = new JLabel("💬 " + nombreDonante);
+    JLabel tt = new JLabel(" " + nombreDonante);
     tt.setFont(new Font("Arial", Font.BOLD, 16));
     tt.setForeground(COLOR_MORADO);
     cont.add(tt);
@@ -332,7 +332,7 @@ private void abrirChatConDonante(int idDonante, String nombreDonante) {
 
     private void mostrarMisPublicaciones() {
         JPanel cont = stack();
-        JLabel tt = new JLabel("📝 Mis publicaciones");
+        JLabel tt = new JLabel(" Mis publicaciones");
         tt.setFont(new Font("Arial", Font.BOLD, 16));
         tt.setForeground(new Color(60,60,80));
         cont.add(tt);
@@ -353,7 +353,7 @@ private void abrirChatConDonante(int idDonante, String nombreDonante) {
 
     private void mostrarDonacionesTODO() {
         JPanel cont = stack();
-        cont.add(banner("💰 Donaciones", "Este módulo se conectará a dbo.Donaciones"));
+        cont.add(banner(" Donaciones", "Este módulo se conectará a dbo.Donaciones"));
         cont.add(infoVacio("Pronto verás tu historial de donaciones aquí."));
         panelContenido.add(wrap(cont), BorderLayout.NORTH);
     }
@@ -415,7 +415,7 @@ private void abrirChatConDonante(int idDonante, String nombreDonante) {
         JPanel card = card();
 
         // header
-        JLabel h = new JLabel("⏰ " + p.fecha_publicacion.format(fFecha) + (p.estado != null ? " • " + p.estado : ""));
+        JLabel h = new JLabel(" " + p.fecha_publicacion.format(fFecha) + (p.estado != null ? " • " + p.estado : ""));
         h.setFont(new Font("Arial", Font.PLAIN, 11));
         h.setForeground(new Color(120,120,140));
         card.add(h);
@@ -451,7 +451,7 @@ private void abrirChatConDonante(int idDonante, String nombreDonante) {
 
         // imagen (solo mostramos el URL como link simple si existe)
         if (p.imagen_url != null && !p.imagen_url.isBlank()) {
-            JLabel img = new JLabel("🖼️ " + p.imagen_url);
+            JLabel img = new JLabel(" " + p.imagen_url);
             img.setFont(new Font("Arial", Font.ITALIC, 11));
             img.setForeground(COLOR_AZUL);
             card.add(Box.createRigidArea(new Dimension(0,6)));
@@ -462,8 +462,8 @@ private void abrirChatConDonante(int idDonante, String nombreDonante) {
         card.add(Box.createRigidArea(new Dimension(0,10)));
         JPanel acciones = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         acciones.setBackground(COLOR_TARJETA);
-        JButton editar = new JButton("✏️ Editar");
-        JButton eliminar = new JButton("🗑️ Eliminar");
+        JButton editar = new JButton(" Editar");
+        JButton eliminar = new JButton(" Eliminar");
         estilizarSecundario(editar);
         estilizarPeligro(eliminar);
         editar.addActionListener(e -> JOptionPane.showMessageDialog(this, "TODO: pantalla de edición"));
@@ -648,7 +648,7 @@ private void abrirChatConDonante(int idDonante, String nombreDonante) {
     }
     private void mostrarNecesidades() {
     JPanel cont = stack();
-    JLabel tt = new JLabel("📋 Necesidades");
+    JLabel tt = new JLabel("Necesidades");
     tt.setFont(new Font("Arial", Font.BOLD, 16));
     tt.setForeground(new Color(60, 60, 80));
     cont.add(tt);
